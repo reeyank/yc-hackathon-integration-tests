@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ios-test — one command, autonomous iOS integration tests</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0A0E14;--mint:#5EF6A4;--active:#A8FFD0;--dim:#5A6B7A;--edge:#1C2530}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--active);font-family:"JetBrains Mono",monospace;
+       min-height:100vh;display:flex;flex-direction:column;align-items:center;
+       justify-content:center;padding:2rem;gap:2rem}
+  h1{color:var(--mint);font-size:clamp(2rem,6vw,4rem);font-weight:700;letter-spacing:.04em}
+  p.tag{color:var(--dim);font-size:1rem;text-align:center;max-width:42rem;line-height:1.6}
+  .cmd{display:flex;align-items:center;gap:1rem;border:1px solid var(--edge);
+       border-radius:10px;padding:1.1rem 1.4rem;background:#0d121b}
+  .cmd code{color:var(--mint);font-size:clamp(.8rem,2.4vw,1.05rem);white-space:nowrap}
+  button{font-family:inherit;background:transparent;border:1px solid var(--edge);
+          color:var(--dim);border-radius:6px;padding:.45rem .8rem;cursor:pointer}
+  button:hover{color:var(--mint);border-color:var(--mint)}
+  footer{color:var(--dim);font-size:.85rem}
+  a{color:var(--mint);text-decoration:none}
+</style>
+</head>
+<body>
+  <h1>ios-test</h1>
+  <p class="tag">Autonomous integration testing for iOS apps. Run one command
+     from your app's repo — it installs, detects your simulator target, and
+     drives the tests itself.</p>
+  <div class="cmd">
+    <code id="c">curl -fsSL https://OWNER.github.io/REPO/install.sh | bash</code>
+    <button onclick="navigator.clipboard.writeText(document.getElementById('c').textContent);this.textContent='copied'">copy</button>
+  </div>
+  <footer>macOS · Xcode · Python 3.11+ &nbsp;·&nbsp;
+    <a href="https://github.com/OWNER/REPO">source</a></footer>
+</body>
+</html>

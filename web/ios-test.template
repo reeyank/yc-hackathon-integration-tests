@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# ios-test — committable re-runner. Fast path: no clone, no pip.
+# Regenerate via: {{BOOTSTRAP_CMD}}
+set -euo pipefail
+HOME_DIR="${IOS_TEST_HOME:-$HOME/.ios-test}"
+[[ -x "$HOME_DIR/.venv/bin/ios-test" ]] || {
+  echo "ios-test engine not installed. Run:" >&2
+  echo "  {{BOOTSTRAP_CMD}}" >&2
+  exit 1
+}
+LIB="$HOME_DIR/install.sh"
+[[ -f "$LIB" ]] || { echo "Missing $LIB; re-run the installer." >&2; exit 1; }
+IOS_TEST_INSTALLER_LIB=1 source "$LIB"
+ensure_credentials
+read -r APP UDID BUNDLE < <(detect_target)
+run_engine "$HOME_DIR" "$APP" "$UDID" "$BUNDLE"
