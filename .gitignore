@@ -22,3 +22,6 @@ DemoApp/ios/Pods/
 DemoApp/ios/.xcode.env.local
 .gbrain-source
 CLAUDE.md.sync-gbrain.tmp
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
