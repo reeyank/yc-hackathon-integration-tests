@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "app_path": "DemoApp",
+  "flows": [
+    {
+      "name": "onboarding",
+      "gbrain_symbols": [
+        "OnboardingScreen",
+        "finishOnboarding",
+        "ItemListScreen"
+      ],
+      "gbrain_evidence": [
+        "code-def OnboardingScreen: DemoApp/App.tsx:85 function",
+        "code-refs finishOnboarding: DemoApp/App.tsx:16 export statement",
+        "code-def ItemListScreen: DemoApp/App.tsx:101 function"
+      ],
+      "steps": [
+        {
+          "action": "launch",
+          "target": null,
+          "value": null,
+          "screenshot": "1778964568970770000.png",
+          "ui_tree_hash": "f296f738e8f3",
+          "assertions": []
+        },
+        {
+          "action": "tap",
+          "target": {
+            "a11y_id": "onboarding-continue-btn",
+            "label": "Continue",
+            "text": null,
+            "coord": null,
+            "resolved_by": "a11y_id"
+          },
+          "value": null,
+          "screenshot": "1778964571595474000.png",
+          "ui_tree_hash": "1f9e023dbc3b",
+          "assertions": [
+            {
+              "kind": "exists",
+              "selector": "Items",
+              "expected": null
+            }
+          ]
+        }
+      ],
+      "status": "passed",
+      "failure": null
+    },
+    {
+      "name": "browse_items",
+      "gbrain_symbols": [
+        "ItemListScreen",
+        "itemStore.fetch",
+        "DetailScreen"
+      ],
+      "gbrain_evidence": [
+        "code-def ItemListScreen: DemoApp/App.tsx:101 function",
+        "code-def DetailScreen: DemoApp/App.tsx:178 function"
+      ],
+      "steps": [
+        {
+          "action": "tap",
+          "target": {
+            "a11y_id": "item-row-1",
+            "label": "Open Seed accessibility IDs",
+            "text": null,
+            "coord": null,
+            "resolved_by": "a11y_id"
+          },
+          "value": null,
+          "screenshot": "1778964574568746000.png",
+          "ui_tree_hash": "51ef0462ef40",
+          "assertions": [
+            {
+              "kind": "exists",
+              "selector": "Back to list",
+              "expected": null
+            }
+          ]
+        },
+        {
+          "action": "tap",
+          "target": {
+            "a11y_id": "back-to-list-btn",
+            "label": "Back to list",
+            "text": null,
+            "coord": null,
+            "resolved_by": "a11y_id"
+          },
+          "value": null,
+          "screenshot": "1778964577027955000.png",
+          "ui_tree_hash": "1f9e023dbc3b",
+          "assertions": [
+            {
+              "kind": "exists",
+              "selector": "Items",
+              "expected": null
+            }
+          ]
+        }
+      ],
+      "status": "passed",
+      "failure": null
+    },
+    {
+      "name": "create_item",
+      "gbrain_symbols": [
+        "CreateItemScreen",
+        "createItem",
+        "itemStore.add"
+      ],
+      "gbrain_evidence": [
+        "code-def CreateItemScreen: DemoApp/App.tsx:139 function",
+        "code-refs createItem: DemoApp/App.tsx:16 export statement"
+      ],
+      "steps": [
+        {
+          "action": "tap",
+          "target": {
+            "a11y_id": "add-item-btn",
+            "label": "Add item",
+            "text": null,
+            "coord": null,
+            "resolved_by": "a11y_id"
+          },
+          "value": null,
+          "screenshot": "1778964579562493000.png",
+          "ui_tree_hash": "4d9db9bf8594",
+          "assertions": [
+            {
+              "kind": "exists",
+              "selector": "Title",
+              "expected": null
+            }
+          ]
+        },
+        {
+          "action": "type",
+          "target": {
+            "a11y_id": "title-field",
+            "label": "Title",
+            "text": "Title",
+            "coord": null,
+            "resolved_by": "a11y_id"
+          },
+          "value": "Hackathon trace",
+          "screenshot": "1778964582762282000.png",
+          "ui_tree_hash": "6d6b9dfe930c",
+          "assertions": [
+            {
+              "kind": "exists",
+              "selector": "Save",
+              "expected": null
+            }
+          ]
+        },
+        {
+          "action": "tap",
+          "target": {
+            "a11y_id": "save-item-btn",
+            "label": "Save",
+            "text": null,
+            "coord": null,
+            "resolved_by": "a11y_id"
+          },
+          "value": null,
+          "screenshot": "1778964585233407000.png",
+          "ui_tree_hash": "e6432cdf5ceb",
+          "assertions": [
+            {
+              "kind": "exists",
+              "selector": "Saved confirmation",
+              "expected": null
+            }
+          ]
+        }
+      ],
+      "status": "passed",
+      "failure": null
+    },
+    {
+      "name": "settings",
+      "gbrain_symbols": [
+        "SettingsScreen"
+      ],
+      "gbrain_evidence": [
+        "code-def SettingsScreen: DemoApp/App.tsx:199 function"
+      ],
+      "steps": [
+        {
+          "action": "tap",
+          "target": {
+            "a11y_id": "settings-btn",
+            "label": "Settings",
+            "text": null,
+            "coord": null,
+            "resolved_by": "a11y_id"
+          },
+          "value": null,
+          "screenshot": "1778964588139770000.png",
+          "ui_tree_hash": "f587ab90596f",
+          "assertions": [
+            {
+              "kind": "exists",
+              "selector": "Seeded data, local-only mode",
+              "expected": null
+            }
+          ]
+        },
+        {
+          "action": "tap",
+          "target": {
+            "a11y_id": "settings-back-btn",
+            "label": "Back to list",
+            "text": null,
+            "coord": null,
+            "resolved_by": "a11y_id"
+          },
+          "value": null,
+          "screenshot": "1778964590761091000.png",
+          "ui_tree_hash": "2b8f657bc8ae",
+          "assertions": [
+            {
+              "kind": "exists",
+              "selector": "Items",
+              "expected": null
+            }
+          ]
+        }
+      ],
+      "status": "passed",
+      "failure": null
+    }
+  ]
+}

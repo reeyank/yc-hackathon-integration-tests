@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "app_path": "./DemoApp",
+  "flows": [
+    {
+      "name": "create_item",
+      "gbrain_symbols": ["CreateItemScreen", "itemStore.add"],
+      "status": "passed",
+      "failure": null,
+      "steps": [
+        { "action": "launch", "target": null, "value": null,
+          "screenshot": "00.png", "ui_tree_hash": "a1b2c3", "assertions": [] },
+        { "action": "tap",
+          "target": { "a11y_id": "add-btn", "label": null, "text": null,
+                      "coord": null, "resolved_by": "a11y_id" },
+          "value": null, "screenshot": "01.png", "ui_tree_hash": "d4e5f6",
+          "assertions": [ { "kind": "exists", "selector": "title-field",
+                            "expected": null } ] },
+        { "action": "type",
+          "target": { "a11y_id": null, "label": "Title", "text": null,
+                      "coord": null, "resolved_by": "label" },
+          "value": "O'Brien's \"quoted\" café — ünïcødé 日本語",
+          "screenshot": "02.png", "ui_tree_hash": "070809",
+          "assertions": [] },
+        { "action": "tap",
+          "target": { "a11y_id": null, "label": null, "text": null,
+                      "coord": [180.5, 642.0], "resolved_by": "coord" },
+          "value": null, "screenshot": "03.png", "ui_tree_hash": "0a0b0c",
+          "assertions": [ { "kind": "text_contains", "selector": "toast",
+                            "expected": "Saved" } ] }
+      ]
+    },
+    {
+      "name": "empty_assertions_flow",
+      "gbrain_symbols": ["SettingsScreen"],
+      "status": "passed",
+      "failure": null,
+      "steps": [
+        { "action": "launch", "target": null, "value": null,
+          "screenshot": null, "ui_tree_hash": null, "assertions": [] }
+      ]
+    }
+  ]
+}

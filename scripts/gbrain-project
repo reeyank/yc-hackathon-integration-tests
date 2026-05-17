@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_DIR"
+
+if [[ -f ".env" ]]; then
+  set -a
+  source ".env"
+  set +a
+fi
+
+export GBRAIN_HOME="${GBRAIN_HOME:-$PROJECT_DIR/.gbrain-runtime}"
+export GBRAIN_EXPANSION_MODEL="${GBRAIN_EXPANSION_MODEL:-anthropic:claude-haiku-4-5-20251001}"
+export GBRAIN_CHAT_MODEL="${GBRAIN_CHAT_MODEL:-anthropic:claude-sonnet-4-6}"
+
+if [[ "${1:-}" == "unlock" ]]; then
+  exec python3 "$PROJECT_DIR/scripts/gbrain_unlock.py"
+fi
+
+if [[ "${1:-}" == "query" || "${1:-}" == "ask" ]]; then
+  python3 "$PROJECT_DIR/scripts/gbrain_unlock.py" >/dev/null 2>&1 || true
+  exec python3 "$PROJECT_DIR/scripts/gbrain_timeout.py" "$@"
+fi
+
+exec gbrain "$@"

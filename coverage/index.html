@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>gbrain semantic coverage</title>
+<style>
+  :root{
+    --bg:#0A0E14;
+    --node-dormant:#2A3340;
+    --node-lit:#5EF6A4;
+    --node-active:#A8FFD0;
+    --alarm:#FF6B5E;
+    --edge:#1C2530;
+    --text-dim:#5A6B7A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--node-lit);
+    font-family:"JetBrains Mono","Berkeley Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    overflow:hidden;
+  }
+  svg{position:fixed;inset:0;width:100%;height:100%}
+  .hud{
+    position:fixed;top:40px;left:48px;z-index:10;
+    font-size:34px;line-height:1.5;
+  }
+  .hud .count{color:var(--node-active);font-weight:700}
+  .hud .dark{color:var(--alarm)}
+  .hud .sub{font-size:15px;color:var(--text-dim);margin-top:10px;letter-spacing:.06em}
+  .legend{
+    position:fixed;top:40px;right:48px;z-index:10;
+    color:var(--text-dim);font-size:13px;text-align:right;line-height:2;
+  }
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-left:9px;vertical-align:middle}
+  .ticker{
+    position:fixed;bottom:42px;left:50%;transform:translateX(-50%);
+    z-index:10;font-size:19px;color:var(--text-dim);letter-spacing:.04em;
+    border:1px solid var(--edge);padding:12px 22px;border-radius:6px;
+    background:rgba(20,28,38,.55);backdrop-filter:blur(3px);
+  }
+  .ticker .arrow{color:var(--node-active)}
+  .ticker .sym{color:var(--node-lit)}
+  .edge{stroke:var(--edge);stroke-width:1.5;fill:none;transition:stroke .4s}
+  .edge.traversed{stroke:var(--node-lit);stroke-width:2.2;filter:drop-shadow(0 0 6px var(--node-lit))}
+  .node circle{transition:fill .5s,r .35s ease-out}
+  .node text{fill:var(--text-dim);font-size:13px}
+  .node.dormant circle{fill:var(--node-dormant);r:9}
+  .node.dormant text{fill:#39424F}
+  .node.dark circle{
+    fill:none;stroke:var(--alarm);stroke-width:2;stroke-dasharray:3 3;r:11;
+    animation:dark-flicker 2.4s infinite;
+  }
+  .node.dark text{fill:var(--alarm)}
+  .node.lit circle{
+    fill:var(--node-lit);r:13;filter:drop-shadow(0 0 10px var(--node-lit));
+    animation:breathe 3s ease-in-out infinite;
+  }
+  .node.lit text{fill:var(--node-lit)}
+  .node.active circle{
+    fill:var(--node-active);r:18;filter:drop-shadow(0 0 22px var(--node-active));
+    animation:ignite .5s ease-out,breathe 3s ease-in-out infinite .5s;
+  }
+  .node.active text{fill:var(--node-active);font-weight:700}
+  @keyframes breathe{0%,100%{opacity:.78}50%{opacity:1}}
+  @keyframes ignite{0%{r:9;opacity:.4}60%{r:24}100%{r:18;opacity:1}}
+  @keyframes dark-flicker{0%,100%{opacity:.85}47%{opacity:.55}50%{opacity:.95}}
+</style>
+</head>
+<body>
+<div class="hud">
+  gbrain &gt; <span class="count" id="cnt">0/0</span> flows
+  &nbsp;.&nbsp; <span class="dark" id="darkcnt">0</span> symbols dark
+  <div class="sub" id="sub">waiting for trace replay</div>
+</div>
+<div class="legend">
+  exercised <i style="background:#5EF6A4"></i><br>
+  active <i style="background:#A8FFD0"></i><br>
+  dormant <i style="background:#2A3340"></i><br>
+  uncovered <i style="border:2px solid #FF6B5E;background:none"></i>
+</div>
+<svg id="g" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"></svg>
+<div class="ticker" id="ticker"><span class="arrow">&gt;</span> waiting for coverage.json</div>
+<script>
+const FALLBACK={
+  summary:{flows_total:2,flows_passed:0,symbols_dark:0},
+  nodes:[{id:"CreateItemScreen"},{id:"itemStore.add"},{id:"SettingsScreen"}],
+  edges:[{source:"CreateItemScreen",target:"itemStore.add"}],
+  events:[
+    {flow:"create_item",from:"CreateItemScreen",to:"itemStore.add"},
+    {flow:"empty_assertions_flow",to:"SettingsScreen"}
+  ],
+  dark_symbols:[],
+  flows:[{name:"create_item",status:"passed"},{name:"empty_assertions_flow",status:"passed"}]
+};
+const svg=document.getElementById("g");
+const NS="http://www.w3.org/2000/svg";
+const cnt=document.getElementById("cnt");
+const darkcnt=document.getElementById("darkcnt");
+const sub=document.getElementById("sub");
+const ticker=document.getElementById("ticker");
+
+async function loadCoverage(){
+  try{
+    const res=await fetch("coverage.json",{cache:"no-store"});
+    if(!res.ok)throw new Error(String(res.status));
+    return await res.json();
+  }catch(_){
+    return FALLBACK;
+  }
+}
+
+function layout(nodes){
+  const cx=800,cy=460;
+  const rx=470,ry=265;
+  return Object.fromEntries(nodes.map((n,i)=>{
+    const a=(-Math.PI/2)+(Math.PI*2*i/Math.max(nodes.length,1));
+    return [n.id,{id:n.id,x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry}];
+  }));
+}
+
+function pathFor(a,b){
+  const mx=(a.x+b.x)/2;
+  const my=(a.y+b.y)/2-42;
+  return `M${a.x} ${a.y} Q ${mx} ${my} ${b.x} ${b.y}`;
+}
+
+function draw(data){
+  const nodes=layout(data.nodes || []);
+  for(const e of data.edges || []){
+    if(!nodes[e.source] || !nodes[e.target])continue;
+    const line=document.createElementNS(NS,"path");
+    line.setAttribute("d",pathFor(nodes[e.source],nodes[e.target]));
+    line.setAttribute("class","edge");
+    line.dataset.k=e.source+">"+e.target;
+    svg.appendChild(line);
+  }
+  for(const n of Object.values(nodes)){
+    const group=document.createElementNS(NS,"g");
+    group.setAttribute("class","node dormant");
+    group.dataset.id=n.id;
+    const circle=document.createElementNS(NS,"circle");
+    circle.setAttribute("cx",n.x);
+    circle.setAttribute("cy",n.y);
+    group.appendChild(circle);
+    const label=document.createElementNS(NS,"text");
+    label.setAttribute("x",n.x);
+    label.setAttribute("y",n.y-20);
+    label.setAttribute("text-anchor","middle");
+    label.textContent=n.id;
+    group.appendChild(label);
+    svg.appendChild(group);
+  }
+  for(const id of data.dark_symbols || [])setNode(id,"dark");
+}
+
+function setNode(id,cls){
+  const node=[...svg.querySelectorAll(".node")].find(x=>x.dataset.id===id);
+  if(node)node.setAttribute("class","node "+cls);
+}
+
+function traverse(a,b){
+  const edge=svg.querySelector(`[data-k="${a}>${b}"]`);
+  if(edge)edge.classList.add("traversed");
+}
+
+function replay(data){
+  let i=0,active=null,done=new Set(),lit=new Set();
+  const total=data.summary?.flows_total || data.flows?.length || 0;
+  const dark=data.summary?.symbols_dark || data.dark_symbols?.length || 0;
+  cnt.textContent=`0/${total}`;
+  darkcnt.textContent=dark;
+  function tick(){
+    const event=(data.events || [])[i];
+    if(!event){
+      if(active)setNode(active,"lit");
+      cnt.textContent=`${data.summary?.flows_passed || done.size}/${total}`;
+      sub.textContent="trace replay complete";
+      ticker.innerHTML='<span class="arrow">&gt;</span> trace.json committed . replay GREEN';
+      return;
+    }
+    if(active)setNode(active,"lit");
+    if(event.from){setNode(event.from,"lit");lit.add(event.from);}
+    setNode(event.to,"active");
+    active=event.to;
+    lit.add(event.to);
+    if(event.from)traverse(event.from,event.to);
+    done.add(event.flow);
+    cnt.textContent=`${done.size}/${total}`;
+    sub.textContent=`flow: ${event.flow} . ${lit.size} symbols exercised`;
+    const from=event.from ? `<span class="sym">${event.from}</span> -> ` : "";
+    ticker.innerHTML=`<span class="arrow">&gt;</span> exercising ${from}<span class="sym">${event.to}</span>`;
+    i++;
+    setTimeout(tick,950);
+  }
+  setTimeout(tick,900);
+}
+
+loadCoverage().then(data=>{draw(data);replay(data);});
+</script>
+</body>
+</html>

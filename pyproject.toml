@@ -1,0 +1,19 @@
+[project]
+name = "ios-test"
+version = "0.1.0"
+description = "One-command autonomous integration testing for React Native iOS apps, gbrain-directed"
+requires-python = ">=3.11"
+dependencies = [
+    "fb-idb",      # official idb Python client (Issue 1: Python orchestrator)
+    "openai>=1.100.0",
+    "rich>=13.7.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+ios-test = "cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

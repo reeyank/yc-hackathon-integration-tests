@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" == "" || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  cat <<'USAGE'
+Usage:
+  ios-test-agent <repo> --udid <sim-udid> --bundle-id <bundle-id> [options]
+
+Examples:
+  ios-test-agent /path/to/app --udid C320... --bundle-id com.example.app
+  ios-test-agent /path/to/app --udid C320... --bundle-id com.example.app --proxy-log capture.har
+  ios-test-agent /path/to/app --udid C320... --bundle-id com.example.app --live-proxy
+  ios-test-agent /path/to/app --udid C320... --bundle-id com.example.app --fresh-gbrain
+
+Environment:
+  OPENAI_API_KEY            required for OpenAI planning
+  IOS_TEST_OPENAI_MODEL     optional model override, defaults inside ios-test
+  IOS_TEST_AGENT_CYCLES     optional planning cycle limit, defaults to 250
+  IOS_TEST_MITMDUMP_BIN     optional mitmdump binary override for --live-proxy
+  GBRAIN_SYNC_TIMEOUT_S     optional source sync timeout, defaults to 900
+  IOS_TEST_HOME             optional path to this integration_testing repo
+USAGE
+  exit 0
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="${IOS_TEST_HOME:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+cd "$PROJECT_DIR"
+export GBRAIN_HOME="${GBRAIN_HOME:-$PROJECT_DIR/.gbrain-runtime}"
+export GBRAIN_EXPANSION_MODEL="${GBRAIN_EXPANSION_MODEL:-anthropic:claude-haiku-4-5-20251001}"
+export GBRAIN_CHAT_MODEL="${GBRAIN_CHAT_MODEL:-anthropic:claude-sonnet-4-6}"
+
+if [[ -f ".env" ]]; then
+  set -a
+  source ".env"
+  set +a
+fi
+
+if [[ -z "${OPENAI_API_KEY:-}" ]]; then
+  echo "OPENAI_API_KEY is required. Put it in .env or export it before running ios-test-agent." >&2
+  exit 2
+fi
+
+if [[ ! -x ".venv/bin/ios-test" ]]; then
+  python3 -m venv .venv
+  .venv/bin/pip install -e .
+fi
+
+exec .venv/bin/ios-test agent-run "$@"
